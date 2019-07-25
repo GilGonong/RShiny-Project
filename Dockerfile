@@ -1,36 +1,23 @@
-# Install R version 3.5
-FROM r-base:3.5.0
+FROM rocker/shiny:3.5.1
 
-# Install Ubuntu packages
-RUN apt-get update && apt-get install -y \
-    sudo \
-    gdebi-core \
-    pandoc \
-    pandoc-citeproc \
-    libcurl4-gnutls-dev \
-    libcairo2-dev/unstable \
-    libxt-dev \
-    libssl-dev
+RUN apt-get update && apt-get install libcurl4-openssl-dev libv8-3.14-dev -y &&\
+    mkdir -p /var/lib/shiny-server/bookmarks/shiny
 
-# Download and install ShinyServer (latest version)
-RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \
-    VERSION=$(cat version.txt)  && \
-    wget --no-verbose "https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
-    gdebi -n ss-latest.deb && \
-    rm -f version.txt ss-latest.deb
+# Create Directory
+RUN mkdir -p /shinyapp
+	
+# Download and install library
+RUN R -e "install.packages(c('shinydashboard', 'shinyjs', 'V8'))"
 
-# Install R packages that are required
-# TODO: add further package if you need!
-RUN R -e "install.packages(c('shiny', 'shinydashboard'), repos='http://cran.rstudio.com/')"
+# copy the app to the image
+#COPY shinyapp /root/app
+COPY shinyapp /shinyapp
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
-# Copy configuration files into the Docker image
-COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
-COPY /app /srv/shiny-server/
+# make all app files readable (solves issue when dev in Windows, but building in Ubuntu)
+# RUN chmod -R 755 /root/app
+# RUN chmod -R 755 /usr/local/lib/R/etc
 
-# Make the ShinyApp available at port 80
-EXPOSE 80
+EXPOSE 3838
 
-# Copy further configuration files into the Docker image
-COPY shiny-server.sh /usr/bin/shiny-server.sh
-
-CMD ["/usr/bin/shiny-server.sh"]
+CMD ["R", "-e", "shiny::runApp('/shinyapp')"]
