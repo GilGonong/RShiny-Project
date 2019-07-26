@@ -3,13 +3,13 @@ node {
         git credentialsId: 'RProjectPipeline', url: 'https://github.com/GilGonong/R-Project.git'
     }
     stage('Build'){
-        bat 'docker build -t gvgonong/myshinyapp:1.0.0 .'
+        bat 'docker build -t gvgonong/myshinyapp:3.0.1 .'
     }
     stage('Push to Container Registry'){
-        withCredentials([string(credentialsId: 'docker-pwd', variable: 'docker-pwd')]) {
-            bat "docker login -u gvgonong -p ${docker-pwd}"
+        withCredentials([string(credentialsId: 'dhpass', variable: 'dockerhubpass')]) {
+            bat "docker login -u gvgonong -p ${dockerhubpass}"
         }
-        bat 'docker push gvgonong/myshinyapp:1.0.0'
+        bat 'docker push gvgonong/myshinyapp:3.0.1'
     }
     stage('Stage'){
       #add stage server connection here
@@ -24,6 +24,6 @@ node {
         bat "ssh -o StrictHostKeyChecking=no username@ipaddress ${dockerRun}"
     }
     stage('Send notification'){
-      slackSend channel: '#analytics', color: 'good', iconEmoji: '', message: 'Production Deployment Succesfull', teamDomain: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackIngtegration', username: 'GilGonong'
+      slackSend channel: '#analytics', color: 'good', iconEmoji: '', message: 'Production Deployment Succesfull', teamDomain: 'MySlack', tokenCredentialId: 'slackIngtegration', username: 'GilGonong'
     }
 }   
