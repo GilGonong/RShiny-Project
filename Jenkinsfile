@@ -24,6 +24,6 @@ node {
         bat "ssh -o StrictHostKeyChecking=no username@ipaddress ${dockerRun}"
     }
     stage('Send notification'){
-      slackSend channel: '#analytics', color: 'good', iconEmoji: '', message: 'Production Deployment Succesfull', teamDomain: 'MySlack', tokenCredentialId: 'slackIngtegration', username: 'GilGonong'
+      slackSend baseUrl: 'https://hooks.slack.com/services/', channel: '#analytics', color: 'good', iconEmoji: '', message: 'Production deployment successful', teamDomain: 'MySlack', tokenCredentialId: 'slacking01', username: 'gilgonong'
     }
 }   
