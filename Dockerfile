@@ -19,7 +19,7 @@ RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubu
 RUN R -e "install.packages(c('shiny', 'shinydashboard'), repos='http://cran.rstudio.com/')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
-COPY /app /srv/shiny-server/
+COPY /shinyapp /srv/shiny-server/
 
 EXPOSE 80
 
