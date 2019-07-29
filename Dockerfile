@@ -1,3 +1,4 @@
+# Install R version 3.5
 FROM r-base:3.5.0
 
 RUN apt-get update && apt-get install -y \
@@ -10,19 +11,27 @@ RUN apt-get update && apt-get install -y \
     libxt-dev \
     libssl-dev
 
+# Download and install ShinyServer (latest version)
 RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \
     VERSION=$(cat version.txt)  && \
     wget --no-verbose "https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
     gdebi -n ss-latest.deb && \
     rm -f version.txt ss-latest.deb
 
+# Install R packages that are required
 RUN R -e "install.packages(c('shiny', 'shinydashboard'), repos='http://cran.rstudio.com/')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
-COPY /shinyapp /srv/shiny-server/
+COPY /app /srv/shiny-server/
 
 EXPOSE 80
 
+# Copy further configuration files into the Docker image
 COPY shiny-server.sh /usr/bin/shiny-server.sh
 
 CMD ["/usr/bin/shiny-server.sh"]
+
+#RUN mkdir /root/shinyapp
+#COPY shinyapp /root/shinyapp
+#COPY Rprofile.site /usr/local/lib/R/etc/
+#CMD ["R", "-e", "shiny::runApp('/root/shinyapp')"]
